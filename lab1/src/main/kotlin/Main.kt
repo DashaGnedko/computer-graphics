@@ -1,7 +1,10 @@
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+//import androidx.compose.foundation.layout.BoxScopeInstance.align
+//import androidx.compose.foundation.layout.BoxScopeInstance.align
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Slider
 import androidx.compose.material.SliderDefaults
@@ -98,14 +101,20 @@ fun App() {
                 Text("Red:")
                 TextField(
                     value = red.toInt().toString(), singleLine = true,
-                    onValueChange = { newValue: String -> isUserUpdatingRgb = true; red = updateValue(red, newValue, 0, 255) },
+                    onValueChange = { newValue: String ->
+                        isUserUpdatingRgb = true; red = updateValue(red, newValue, 0, 255)
+                    },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     modifier = Modifier.padding(start = 41.dp).width(60.dp)
                 )
                 Slider(
                     value = red, onValueChange = { newvalue -> isUserUpdatingRgb = true; red = newvalue },
                     valueRange = 0f..255f, modifier = Modifier.fillMaxWidth(0.5f),
-                    colors = SliderDefaults.colors(thumbColor = Color.Red, activeTrackColor = Color.Red, inactiveTrackColor = Color.Gray)
+                    colors = SliderDefaults.colors(
+                        thumbColor = Color.Red,
+                        activeTrackColor = Color.Red,
+                        inactiveTrackColor = Color.Gray
+                    )
                 )
             }
         }
@@ -115,14 +124,20 @@ fun App() {
                 Text("Green:")
                 TextField(
                     value = green.toInt().toString(), singleLine = true,
-                    onValueChange = { newValue: String -> isUserUpdatingRgb = true; green = updateValue(green, newValue, 0, 255) },
+                    onValueChange = { newValue: String ->
+                        isUserUpdatingRgb = true; green = updateValue(green, newValue, 0, 255)
+                    },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     modifier = Modifier.padding(start = 28.dp).width(60.dp)
                 )
                 Slider(
                     value = green, onValueChange = { newvalue -> isUserUpdatingRgb = true; green = newvalue },
                     valueRange = 0f..255f, modifier = Modifier.fillMaxWidth(0.5f),
-                    colors = SliderDefaults.colors(thumbColor = Color.Green, activeTrackColor = Color.Green, inactiveTrackColor = Color.Gray)
+                    colors = SliderDefaults.colors(
+                        thumbColor = Color.Green,
+                        activeTrackColor = Color.Green,
+                        inactiveTrackColor = Color.Gray
+                    )
                 )
             }
         }
@@ -132,14 +147,20 @@ fun App() {
                 Text("Blue:")
                 TextField(
                     value = blue.toInt().toString(), singleLine = true,
-                    onValueChange = { newValue: String -> isUserUpdatingRgb = true; blue = updateValue(blue, newValue, 0, 255) },
+                    onValueChange = { newValue: String ->
+                        isUserUpdatingRgb = true; blue = updateValue(blue, newValue, 0, 255)
+                    },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     modifier = Modifier.padding(start = 38.dp).width(60.dp)
                 )
                 Slider(
                     value = blue, onValueChange = { newvalue -> isUserUpdatingRgb = true; blue = newvalue },
                     valueRange = 0f..255f, modifier = Modifier.fillMaxWidth(0.5f),
-                    colors = SliderDefaults.colors(thumbColor = Color.Blue, activeTrackColor = Color.Blue, inactiveTrackColor = Color.Gray)
+                    colors = SliderDefaults.colors(
+                        thumbColor = Color.Blue,
+                        activeTrackColor = Color.Blue,
+                        inactiveTrackColor = Color.Gray
+                    )
                 )
             }
         }
@@ -151,14 +172,20 @@ fun App() {
                 Text("Cyan:")
                 TextField(
                     value = cyan.toInt().toString(), singleLine = true,
-                    onValueChange = { newValue: String -> isUserUpdatingCmyk = true; cyan = updateValue(cyan, newValue, 0, 100) },
+                    onValueChange = { newValue: String ->
+                        isUserUpdatingCmyk = true; cyan = updateValue(cyan, newValue, 0, 100)
+                    },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     modifier = Modifier.padding(start = 35.dp).width(60.dp)
                 )
                 Slider(
                     value = cyan, onValueChange = { newvalue -> isUserUpdatingCmyk = true; cyan = newvalue },
                     valueRange = 0f..100f, modifier = Modifier.fillMaxWidth(0.5f),
-                    colors = SliderDefaults.colors(thumbColor = Color.Cyan, activeTrackColor = Color.Cyan, inactiveTrackColor = Color.Gray)
+                    colors = SliderDefaults.colors(
+                        thumbColor = Color.Cyan,
+                        activeTrackColor = Color.Cyan,
+                        inactiveTrackColor = Color.Gray
+                    )
                 )
             }
         }
@@ -167,14 +194,20 @@ fun App() {
                 Text("Magenta:")
                 TextField(
                     value = magenta.toInt().toString(), singleLine = true,
-                    onValueChange = { newValue: String -> isUserUpdatingCmyk = true; magenta = updateValue(magenta, newValue, 0, 100) },
+                    onValueChange = { newValue: String ->
+                        isUserUpdatingCmyk = true; magenta = updateValue(magenta, newValue, 0, 100)
+                    },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     modifier = Modifier.padding(start = 10.dp).width(60.dp)
                 )
                 Slider(
                     value = magenta, onValueChange = { newvalue -> isUserUpdatingCmyk = true; magenta = newvalue },
                     valueRange = 0f..100f, modifier = Modifier.fillMaxWidth(0.5f),
-                    colors = SliderDefaults.colors(thumbColor = Color.Magenta, activeTrackColor = Color.Magenta, inactiveTrackColor = Color.Gray)
+                    colors = SliderDefaults.colors(
+                        thumbColor = Color.Magenta,
+                        activeTrackColor = Color.Magenta,
+                        inactiveTrackColor = Color.Gray
+                    )
                 )
             }
         }
@@ -183,14 +216,20 @@ fun App() {
                 Text("Yellow:")
                 TextField(
                     value = yellow.toInt().toString(), singleLine = true,
-                    onValueChange = { newValue: String -> isUserUpdatingCmyk = true; yellow = updateValue(yellow, newValue, 0, 100) },
+                    onValueChange = { newValue: String ->
+                        isUserUpdatingCmyk = true; yellow = updateValue(yellow, newValue, 0, 100)
+                    },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     modifier = Modifier.padding(start = 26.dp).width(60.dp)
                 )
                 Slider(
                     value = yellow, onValueChange = { newvalue -> isUserUpdatingCmyk = true; yellow = newvalue },
                     valueRange = 0f..100f, modifier = Modifier.fillMaxWidth(0.5f),
-                    colors = SliderDefaults.colors(thumbColor = Color.Yellow, activeTrackColor = Color.Yellow, inactiveTrackColor = Color.Gray)
+                    colors = SliderDefaults.colors(
+                        thumbColor = Color.Yellow,
+                        activeTrackColor = Color.Yellow,
+                        inactiveTrackColor = Color.Gray
+                    )
                 )
             }
         }
@@ -199,14 +238,20 @@ fun App() {
                 Text("Black:")
                 TextField(
                     value = black.toInt().toString(), singleLine = true,
-                    onValueChange = { newValue: String -> isUserUpdatingCmyk = true; black = updateValue(black, newValue, 0, 100) },
+                    onValueChange = { newValue: String ->
+                        isUserUpdatingCmyk = true; black = updateValue(black, newValue, 0, 100)
+                    },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     modifier = Modifier.padding(start = 33.dp).width(60.dp)
                 )
                 Slider(
                     value = black, onValueChange = { newvalue -> isUserUpdatingCmyk = true; black = newvalue },
                     valueRange = 0f..100f, modifier = Modifier.fillMaxWidth(0.5f),
-                    colors = SliderDefaults.colors(thumbColor = Color.Black, activeTrackColor = Color.Black, inactiveTrackColor = Color.Gray)
+                    colors = SliderDefaults.colors(
+                        thumbColor = Color.Black,
+                        activeTrackColor = Color.Black,
+                        inactiveTrackColor = Color.Gray
+                    )
                 )
             }
         }
@@ -218,7 +263,9 @@ fun App() {
                 Text("Hue:")
                 TextField(
                     value = hue.toInt().toString(), singleLine = true,
-                    onValueChange = { newValue: String -> isUserUpdatingHsl = true; hue = updateValue(hue, newValue, 0, 360) },
+                    onValueChange = { newValue: String ->
+                        isUserUpdatingHsl = true; hue = updateValue(hue, newValue, 0, 360)
+                    },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     modifier = Modifier.padding(start = 40.dp).width(60.dp)
                 )
@@ -234,7 +281,9 @@ fun App() {
                 Text("Lightness:")
                 TextField(
                     value = lightness.toInt().toString(), singleLine = true,
-                    onValueChange = { newValue: String -> isUserUpdatingHsl = true; lightness = updateValue(lightness, newValue, 0, 100) },
+                    onValueChange = { newValue: String ->
+                        isUserUpdatingHsl = true; lightness = updateValue(lightness, newValue, 0, 100)
+                    },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     modifier = Modifier.padding(start = 8.dp).width(60.dp)
                 )
@@ -250,7 +299,9 @@ fun App() {
                 Text("Saturation:")
                 TextField(
                     value = saturation.toInt().toString(), singleLine = true,
-                    onValueChange = { newValue: String -> isUserUpdatingHsl = true; saturation = updateValue(saturation, newValue, 0, 100) },
+                    onValueChange = { newValue: String ->
+                        isUserUpdatingHsl = true; saturation = updateValue(saturation, newValue, 0, 100)
+                    },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     modifier = Modifier.padding(start = 3.dp).width(60.dp)
                 )
@@ -274,6 +325,106 @@ fun App() {
         )
     }
 
+    Column(modifier = Modifier.fillMaxSize()) {
+        Row(modifier = Modifier.fillMaxWidth().padding(top = 20.dp, end = 70.dp), horizontalArrangement = Arrangement.End) {
+            var r = 0
+            val step = 25
+            for (i in 1..10) {
+                r += step
+                ColorBox(color = Color(r, 0, 0)) { color ->
+                    red = color.red * 255
+                    green = color.green * 255
+                    blue = color.blue * 255
+                    isUserUpdatingRgb = true
+                }
+            }
+        }
+        Row(modifier = Modifier.fillMaxWidth().padding(end = 70.dp), horizontalArrangement = Arrangement.End) {
+            var g = 0
+            val step = 25
+            for (i in 1..10) {
+                g += step
+                ColorBox(color = Color(0, g, 0)) { color ->
+                    red = color.red * 255
+                    green = color.green * 255
+                    blue = color.blue * 255
+                    isUserUpdatingRgb = true
+                }
+            }
+        }
+        Row(modifier = Modifier.fillMaxWidth().padding(end = 70.dp), horizontalArrangement = Arrangement.End) {
+            var b = 0
+            val step = 25
+            for (i in 1..10) {
+                b += step
+                ColorBox(color = Color(0, 0, b)) { color ->
+                    red = color.red * 255
+                    green = color.green * 255
+                    blue = color.blue * 255
+                    isUserUpdatingRgb = true
+                }
+            }
+        }
+    }
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier.fillMaxSize().padding(bottom = 40.dp),
+            verticalArrangement = Arrangement.Bottom, horizontalAlignment = Alignment.End
+        ) {
+            Row(modifier = Modifier.fillMaxWidth().padding(end = 70.dp), horizontalArrangement = Arrangement.End) {
+                var b = 0
+                val step = 25
+                for (i in 1..10) {
+                    b += step
+                    ColorBox(color = Color(255, 255, b)) { color ->
+                        red = color.red * 255
+                        green = color.green * 255
+                        blue = color.blue * 255
+                        isUserUpdatingRgb = true
+                    }
+                }
+            }
+            Row(modifier = Modifier.fillMaxWidth().padding(end = 70.dp), horizontalArrangement = Arrangement.End) {
+                var b = 0
+                val step = 25
+                for (i in 1..10) {
+                    b += step
+                    ColorBox(color = Color(0, 255, b)) { color ->
+                        red = color.red * 255
+                        green = color.green * 255
+                        blue = color.blue * 255
+                        isUserUpdatingRgb = true
+                    }
+                }
+            }
+            Row(modifier = Modifier.fillMaxWidth().padding(end = 70.dp), horizontalArrangement = Arrangement.End) {
+                var b = 0
+                val step = 25
+                for (i in 1..10) {
+                    b += step
+                    ColorBox(color = Color(b, 0, 255)) { color ->
+                        red = color.red * 255
+                        green = color.green * 255
+                        blue = color.blue * 255
+                        isUserUpdatingRgb = true
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun ColorBox(color: Color, onClick: (Color) -> Unit) {
+    Box(
+        modifier = Modifier
+            .size(50.dp)
+            .background(color)
+            .border(BorderStroke(0.5.dp, Color.Black))
+            .clickable {
+                onClick(color)
+            }
+    )
 }
 
 fun rgbToCmyk(r: Int, g: Int, b: Int): FloatArray {
@@ -296,8 +447,8 @@ fun cmykToRgb(c: Float, m: Float, y: Float, k: Float): IntArray {
     return intArrayOf(r, g, b)
 }
 
-fun hueToRgb(p: Float, q: Float, t1: Float) : Float {
-    var t : Float = t1
+fun hueToRgb(p: Float, q: Float, t1: Float): Float {
+    var t: Float = t1
     if (t < 0f) t += 1
     if (t > 1f) t -= 1
     if (t < 1f / 6f) return p + (q - p) * 6 * t
@@ -311,7 +462,7 @@ fun hslToRgb(h: Float, s: Float, l: Float): IntArray {
     var g: Float = l
     var b: Float = l
     if (s != 0f) {
-        var q: Float = if (l < 0.5f ) l * (1 + s) else l + s - l * s
+        var q: Float = if (l < 0.5f) l * (1 + s) else l + s - l * s
         val p = 2 * l - q
         r = hueToRgb(p, q, h + 1f / 3f)
         g = hueToRgb(p, q, h)
@@ -321,7 +472,7 @@ fun hslToRgb(h: Float, s: Float, l: Float): IntArray {
     return intArrayOf((r * 255).toInt(), (g * 255).toInt(), (b * 255).toInt())
 }
 
-fun rgbToHsl(red: Float, green: Float, blue: Float) : FloatArray {
+fun rgbToHsl(red: Float, green: Float, blue: Float): FloatArray {
     val r: Float = red / 255
     val g: Float = green / 255
     val b: Float = blue / 255
@@ -366,9 +517,11 @@ fun main() = application {
         width = 1320.dp,
         height = 750.dp
     )
-    Window(onCloseRequest = ::exitApplication,
+    Window(
+        onCloseRequest = ::exitApplication,
         state = windowState,
-        title = "Color picker") {
+        title = "Color picker"
+    ) {
         window.setExtendedState(java.awt.Frame.MAXIMIZED_BOTH)
         App()
     }
