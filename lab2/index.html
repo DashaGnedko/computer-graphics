@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Загрузка и обработка изображения</title>
+    <style>
+        .image-container {
+            display: flex;
+            gap: 20px;
+        }
+        .canvas {
+            border: 1px solid #ccc;
+        }
+        .button-group {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Загрузите изображение</h1>
+    
+    <input type="file" id="fileInput" accept="image/*">
+    <button onclick="displayImage()">Отобразить изображение</button>
+
+    <h2>Оригинальное и обработанное изображение:</h2>
+    <div class="image-container">
+        <canvas id="originalCanvas" class="canvas" width="300" height="300"></canvas>
+        <canvas id="processedCanvas" class="canvas" width="300" height="300"></canvas>
+    </div>
+
+    <div class="button-group">
+        <button onclick="applyStandardSharpen()">Standard Sharpen</button>
+        <button onclick="applyEdgeEnhance()">Edge Enhance</button>
+        <button onclick="applyDilation()">Dilation (Расширение)</button>
+        <button onclick="applyErosion()">Erosion (Сужение)</button>
+    </div>
+
+    <script>
+        const fileInput = document.getElementById('fileInput');
+        const originalCanvas = document.getElementById('originalCanvas');
+        const processedCanvas = document.getElementById('processedCanvas');
+        const originalCtx = originalCanvas.getContext('2d');
+        const processedCtx = processedCanvas.getContext('2d');
+
+        function displayImage() {
+            if (fileInput.files.length === 0) {
+                alert('Пожалуйста, выберите изображение');
+                return;
+            }
+
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function(event) {
+                const img = new Image();
+                img.onload = function() {
+                    originalCanvas.width = img.width;
+                    originalCanvas.height = img.height;
+                    processedCanvas.width = img.width;
+                    processedCanvas.height = img.height;
+
+                    originalCtx.drawImage(img, 0, 0);
+                    processedCtx.drawImage(img, 0, 0);
+                };
+                img.src = event.target.result;
+            };
+
+            reader.readAsDataURL(file);
+        }
+
+        function applyStandardSharpen() {
+            const kernel = [
+                0, -1,  0,
+                -1,  5, -1,
+                0, -1,  0
+            ];
+            applyFilter(kernel);
+        }
+
+        function applyEdgeEnhance() {
+            const kernel = [
+                -1, -1, -1,
+                -1,  9, -1,
+                -1, -1, -1
+            ];
+            applyFilter(kernel);
+        }
+
+        function applyDilation() {
+            const imageData = originalCtx.getImageData(0, 0, originalCanvas.width, originalCanvas.height);
+            const data = imageData.data;
+            const result = new Uint8ClampedArray(data);
+
+            for (let i = 0; i < data.length; i += 4) {
+                for (let j = i; j < i + 3; j++) {
+                    const neighbors = [
+                    data[j - 4] || 0, data[j + 4] || 0,
+                    data[j - originalCanvas.width * 4] || 0, data[j + originalCanvas.width * 4] || 0,
+                    data[j]
+                    ];
+
+                    const maxVal = Math.max(...neighbors);
+                    result[j] = maxVal;
+                }
+                
+                result[i + 3] = 255;
+            }
+
+            processedCtx.putImageData(new ImageData(result, imageData.width, imageData.height), 0, 0);
+        }
+
+        function applyErosion() {
+            const imageData = originalCtx.getImageData(0, 0, originalCanvas.width, originalCanvas.height);
+            const data = imageData.data;
+            const result = new Uint8ClampedArray(data);
+
+            for (let i = 0; i < data.length; i += 4) {
+                for (let j = i; j < i + 3; j++) {
+                    const neighbors = [
+                    data[j - 4] || 255, data[j + 4] || 255,
+                    data[j - originalCanvas.width * 4] || 255, data[j + originalCanvas.width * 4] || 255,
+                    data[j]
+                    ];
+
+                    const minVal = Math.min(...neighbors);
+                    result[j] = minVal;
+                }
+                
+                result[i + 3] = 255;
+            }
+
+            processedCtx.putImageData(new ImageData(result, imageData.width, imageData.height), 0, 0);
+        }
+
+        function applyFilter(kernel) {
+            const imageData = originalCtx.getImageData(0, 0, originalCanvas.width, originalCanvas.height);
+            const data = imageData.data;
+            const result = new Uint8ClampedArray(data);
+
+            for (let y = 0; y < imageData.height; y++) {
+                for (let x = 0; x < imageData.width; x++) {
+                    const dstOff = (y * imageData.width + x) * 4;
+                    let r = 0, g = 0, b = 0;
+                    let ind = 0;
+                    let kernelSum = 0;
+
+                    for (let ky = -1; ky <= 1; ky++) {
+                        for (let kx = -1; kx <= 1; kx++) {
+                            const scy = y + ky;
+                            const scx = x + kx;
+
+                            if (scy >= 0 && scy < imageData.height && scx >= 0 && scx < imageData.width) {
+                                const srcOff = (scy * imageData.width + scx) * 4;
+
+                                r += data[srcOff] * kernel[ind];
+                                g += data[srcOff + 1] * kernel[ind];
+                                b += data[srcOff + 2] * kernel[ind];
+                                kernelSum += kernel[ind];
+                            }
+                            ind += 1;
+                        }
+                    }
+
+
+                    result[dstOff] = Math.min(255, Math.max(0, r / kernelSum));
+                    result[dstOff + 1] = Math.min(255, Math.max(0, g / kernelSum));
+                    result[dstOff + 2] = Math.min(255, Math.max(0, b / kernelSum));
+                    result[dstOff + 3] = 255;
+                }
+            }
+
+            processedCtx.putImageData(new ImageData(result, imageData.width, imageData.height), 0, 0);
+        }
+    </script>
+</body>
+</html>
