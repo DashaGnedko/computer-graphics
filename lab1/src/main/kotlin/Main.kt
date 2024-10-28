@@ -3,8 +3,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-//import androidx.compose.foundation.layout.BoxScopeInstance.align
-//import androidx.compose.foundation.layout.BoxScopeInstance.align
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Slider
 import androidx.compose.material.SliderDefaults
@@ -14,11 +12,15 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
+import java.awt.Dimension
+import java.awt.SystemColor.window
+import java.awt.Toolkit
 
 @Composable
 fun App() {
@@ -52,7 +54,7 @@ fun App() {
             black = cmyk[3] * 100
 
             val hsl = rgbToHsl(red, green, blue)
-            hue = hsl[0] * 360
+            hue = hsl[0] * 100
             saturation = hsl[1] * 100
             lightness = hsl[2] * 100
         }
@@ -70,7 +72,7 @@ fun App() {
             blue = rgb[2].toFloat()
 
             val hsl = rgbToHsl(red, green, blue)
-            hue = hsl[0] * 360
+            hue = hsl[0] * 100
             saturation = hsl[1] * 100
             lightness = hsl[2] * 100
         }
@@ -82,7 +84,7 @@ fun App() {
             isUserUpdatingCmyk = false
             isUserUpdatingHsl = false
 
-            val rgb = hslToRgb(hue / 360f, saturation / 100f, lightness / 100f)
+            val rgb = hslToRgb(hue / 100f, saturation / 100f, lightness / 100f)
             red = rgb[0].toFloat()
             green = rgb[1].toFloat()
             blue = rgb[2].toFloat()
@@ -264,14 +266,14 @@ fun App() {
                 TextField(
                     value = hue.toInt().toString(), singleLine = true,
                     onValueChange = { newValue: String ->
-                        isUserUpdatingHsl = true; hue = updateValue(hue, newValue, 0, 360)
+                        isUserUpdatingHsl = true; hue = updateValue(hue, newValue, 0, 100)
                     },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     modifier = Modifier.padding(start = 40.dp).width(60.dp)
                 )
                 Slider(
                     value = hue, onValueChange = { newvalue -> isUserUpdatingHsl = true; hue = newvalue },
-                    valueRange = 0f..360f, modifier = Modifier.fillMaxWidth(0.5f),
+                    valueRange = 0f..100f, modifier = Modifier.fillMaxWidth(0.5f),
                     colors = SliderDefaults.colors(inactiveTrackColor = Color.Gray)
                 )
             }
@@ -447,52 +449,56 @@ fun cmykToRgb(c: Float, m: Float, y: Float, k: Float): IntArray {
     return intArrayOf(r, g, b)
 }
 
-fun hueToRgb(p: Float, q: Float, t1: Float): Float {
-    var t: Float = t1
+fun hueToRgb(p: Float, q: Float, t1: Float) : Float {
+    var t = t1
     if (t < 0f) t += 1
     if (t > 1f) t -= 1
-    if (t < 1f / 6f) return p + (q - p) * 6 * t
-    if (t < 1f / 2f) return q
-    if (t < 2f / 3f) return p + (q - p) * (2 / 3 - t) * 6
+    if (t < 1f/6f) return p + (q - p) * 6 * t
+    if (t < 1f/2f) return q
+    if (t < 2f/3f) return p + (q - p) * (2f/3f - t) * 6
     return p
 }
 
 fun hslToRgb(h: Float, s: Float, l: Float): IntArray {
-    var r: Float = l
-    var g: Float = l
-    var b: Float = l
-    if (s != 0f) {
-        var q: Float = if (l < 0.5f) l * (1 + s) else l + s - l * s
+    var r: Float = 0f
+    var g: Float = 0f
+    var b: Float = 0f
+
+    if (s == 0f) {
+        r = l
+        g = l
+        b = l
+    } else {
+        val q = if (l < 0.5) l * (1 + s) else l + s - l * s
         val p = 2 * l - q
-        r = hueToRgb(p, q, h + 1f / 3f)
+        r = hueToRgb(p, q, h + 1f/3f)
         g = hueToRgb(p, q, h)
-        b = hueToRgb(p, q, h - 1f / 3f)
+        b = hueToRgb(p, q, h - 1f/3f)
     }
 
     return intArrayOf((r * 255).toInt(), (g * 255).toInt(), (b * 255).toInt())
 }
 
 fun rgbToHsl(red: Float, green: Float, blue: Float): FloatArray {
-    val r: Float = red / 255
-    val g: Float = green / 255
-    val b: Float = blue / 255
+    val r: Float = red / 255f
+    val g: Float = green / 255f
+    val b: Float = blue / 255f
     val vmax: Float = maxOf(r, g, b)
     val vmin: Float = minOf(r, g, b)
     var h: Float = 0f
     var s: Float = 0f
     val l: Float = (vmax + vmin) / 2f
 
-    val d = vmax - vmin;
-    val eps = 0.000000000001f
-    if (d < eps) {
+    if (vmax == vmin) {
         return floatArrayOf(0f, 0f, l)
     }
 
-    s = (if (l > 0.5f) d / (2 - vmax - vmin) else d / (vmax + vmin))
-    if (vmax - r < eps) h = (g - b) / d + (if (g < b) 6 else 0)
-    if (vmax - g < eps) h = (b - r) / d + 2
-    if (vmax - b < eps) h = (r - g) / d + 4
-    h /= 6;
+    val d: Float = vmax - vmin;
+    s = if (l > 0.5f) d / (2 - vmax - vmin) else d / (vmax + vmin)
+    if (vmax == r) h = (g - b) / d + (if (g < b) 6 else 0)
+    if (vmax == g) h = (b - r) / d + 2
+    if (vmax == b) h = (r - g) / d + 4
+    h /= 6f
 
     return floatArrayOf(h, s, l)
 }
@@ -513,16 +519,28 @@ fun updateValue(was: Float, newValue: String, left: Int, right: Int): Float {
 
 
 fun main() = application {
+    val screenSize = Toolkit.getDefaultToolkit().screenSize
+
     val windowState = rememberWindowState(
         width = 1320.dp,
         height = 750.dp
     )
+
     Window(
         onCloseRequest = ::exitApplication,
         state = windowState,
-        title = "Color picker"
+        title = "Color Picker"
     ) {
-        window.setExtendedState(java.awt.Frame.MAXIMIZED_BOTH)
+        val density = LocalDensity.current
+
+        val minWidthPx = with(density) { 1320.dp.toPx().toInt() }
+        val minHeightPx = with(density) { 750.dp.toPx().toInt() }
+        window.minimumSize = Dimension(minWidthPx, minHeightPx)
+
+        val maxWidthPx = with(density) { 1520.dp.toPx().toInt() }
+        val maxHeightPx = with(density) { 850.dp.toPx().toInt() }
+        window.maximumSize = Dimension(maxWidthPx, maxHeightPx)
+
         App()
     }
 }
