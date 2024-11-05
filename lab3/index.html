@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Базовые растровые алгоритмы</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        #main-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        #container {
+            display: flex;
+            gap: 20px;
+        }
+        #canvas-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        #canvas {
+            border: 1px solid black;
+            background-color: #f0f0f0;
+        }
+        #controls {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        #info {
+            margin-top: 10px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            width: 300px;
+            text-align: center;
+        }
+        #output-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        #output {
+            border: 1px solid #ccc;
+            width: 300px;
+            height: 400px;
+            padding: 10px;
+            overflow-y: auto;
+            font-size: 14px;
+            background-color: #f9f9f9;
+        }
+        .scale-control {
+            display: flex;
+            align-items: center;
+            margin-top: 10px;
+        }
+        .scale-value {
+            margin-left: 10px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div id="main-container">
+    <div id="container">
+        <div id="canvas-container">
+            <h2>Базовые растровые алгоритмы</h2>
+            <canvas id="canvas" width="600" height="400"></canvas>
+            <div id="controls">
+                <div>
+                    <label for="algorithm">Выберите алгоритм:</label>
+                    <select id="algorithm" onchange="updateInputFields(); output.innerHTML = ''; drawGrid();">
+                        <option value="step">Пошаговый алгоритм</option>
+                        <option value="dda">Алгоритм ЦДА</option>
+                        <option value="bresenham">Алгоритм Брезенхема</option>
+                        <option value="bresenhamCircle">Алгоритм Брезенхема (окружность)</option>
+                    </select>
+                    <button onclick="numberOfClicks++; draw();">Отрисовать</button>
+                </div>
+
+                <div>
+                    <div id="lines" style="display: none;">
+                        <div>
+                            <label for="startX">x0:</label>
+                            <input type="number" id="startX" value="0">
+                            <label for="startY">y0:</label>
+                            <input type="number" id="startY" value="0">
+                        </div>
+                        <div>
+                            <label for="endX">x1:</label>
+                            <input type="number" id="endX" value="0">
+                            <label for="endY">y1:</label>
+                            <input type="number" id="endY" value="0">
+                        </div>
+                    </div>
+
+                    <div id="circles" style="display: none;">
+                        <label for="centerX">x0:</label>
+                        <input type="number" id="centerX" value="0">
+                        <label for="centerY">y0:</label>
+                        <input type="number" id="centerY" value="0">
+                        <label for="radius">r:</label>
+                        <input type="number" id="radius" value="0">
+                    </div>
+                </div>
+
+                <div class="scale-control">
+                    <label for="scale">Масштаб сетки:</label>
+                    <input type="range" id="scale" min="1" max="50" value="20" oninput="updateScale()">
+                    <span id="scaleValue" class="scale-value">20</span>
+                </div>
+            </div>
+
+            <div id="info">Координаты: (x: 0, y: 0)</div>
+        </div>
+
+        <div id="output-container">
+            <h2>Вывод алгоритма</h2>
+            <div id="output">Информация о выполнении алгоритма</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const info = document.getElementById('info');
+    const output = document.getElementById('output');
+    const scaleInput = document.getElementById('scale');
+    const scaleValueDisplay = document.getElementById('scaleValue');
+
+    let gridSize = parseInt(scaleInput.value, 10);
+    const width = canvas.width;
+    const height = canvas.height;
+
+    let startPoint = { x: 0, y: 0};
+    let endPoint = { x: 0, y: 0 };
+    let centerPoint = { x: 0, y: 0 };
+    let radiusLen = 0;
+    let numberOfClicks = 0;
+
+    function updateInputFields() {
+        const algorithm = document.getElementById('algorithm').value;
+        const lines = document.getElementById('lines');
+        const circles = document.getElementById('circles');
+
+        if (algorithm === 'bresenhamCircle') {
+            lines.style.display = 'none';
+            circles.style.display = 'block';
+        } else {
+            lines.style.display = 'block';
+            circles.style.display = 'none';
+        }
+    }
+
+    function drawGrid() {
+        ctx.clearRect(0, 0, width, height);
+
+        ctx.strokeStyle = '#ddd';
+        ctx.lineWidth = 1;
+        for (let x = width / 2; x <= width; x += gridSize) {
+            ctx.beginPath();
+            ctx.moveTo(x, 0);
+            ctx.lineTo(x, height);
+            ctx.stroke();
+        }
+        for (let x = width / 2; x >= 0; x -= gridSize) {
+            ctx.beginPath();
+            ctx.moveTo(x, 0);
+            ctx.lineTo(x, height);
+            ctx.stroke();
+        }
+        for (let y = height / 2; y <= height; y += gridSize) {
+            ctx.beginPath();
+            ctx.moveTo(0, y);
+            ctx.lineTo(width, y);
+            ctx.stroke();
+        }
+        for (let y = height / 2; y >= 0; y -= gridSize) {
+            ctx.beginPath();
+            ctx.moveTo(0, y);
+            ctx.lineTo(width, y);
+            ctx.stroke();
+        }
+
+        ctx.strokeStyle = '#000';
+        ctx.lineWidth = 2;
+
+        ctx.beginPath();
+        ctx.moveTo(0, height / 2);
+        ctx.lineTo(width, height / 2);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(width / 2, 0);
+        ctx.lineTo(width / 2, height);
+        ctx.stroke();
+
+        ctx.strokeStyle = '#ddd';
+        ctx.fillStyle = 'black';
+
+        ctx.fillText("X", width - 15, height / 2 - 15);
+        ctx.fillText("Y", width / 2 - 15, 15);
+
+        let i = 1;
+        for (let x = width / 2 + gridSize; x <= width; x += gridSize, i++) {
+            ctx.fillText(i, x, height / 2 + 10);
+        }
+        i = -1;
+        for (let x = width / 2 - gridSize; x >= 0; x -= gridSize, i--) {
+            ctx.fillText(i, x, height / 2 + 10);
+        }
+        i = -1;
+        for (let y = height / 2 + gridSize; y <= height; y += gridSize, i--) {
+            ctx.fillText(i, width / 2 + 5, y);
+        }
+        i = 1;
+        for (let y = height / 2 - gridSize; y >= 0; y -= gridSize, i++) {
+            ctx.fillText(i, width / 2 + 5, y);
+        }
+        
+    }
+
+    function toCanvas(x, y) {
+        return {x: width / 2 + x * gridSize, y: height / 2 - y * gridSize};
+    }
+
+    function fillSquare(x, y, color = 'red') {
+        const { x: canvasX, y: canvasY } = toCanvas(x, y);
+        ctx.fillStyle = color;
+        ctx.fillRect(canvasX, canvasY - gridSize, gridSize, gridSize);
+    }
+
+    function drawStepAlgorithm() {
+        addToOutput("Пошаговый алгоритм:");
+
+        let x0 = startPoint.x;
+        let y0 = startPoint.y;
+        let x1 = endPoint.x;
+        let y1 = endPoint.y;
+
+        addToOutput(`Стартовая точка: (${x0}, ${y0})`);
+        addToOutput(`Конечная точка: (${x1}, ${y1})`);
+
+        const start = performance.now();
+        
+        if (x0 > x1) swap(x0, x1);
+        if (y0 > y1) swap(y0, y1);
+
+        let dx = x1 - x0;
+        let dy = y1 - y0;
+
+        addToOutput(`dx = ${dx}`);
+        addToOutput(`dy = ${dy}`);
+
+        if (dy <= dx) {
+            addToOutput(`|dy| <= |dx|, рисуем, просматривая x от ${x0} до ${x1}`);
+            let step = dy / dx;
+            if (dx == 0) step = 0;
+            
+            for (let x = x0; x <= x1; x++) {
+                let y = y0 + step * (x - x0);
+                addToOutput(`Для x = ${x} найдена точка y = ${y} -> рисуем (${x}, ${Math.floor(y)})`);
+                fillSquare(x, Math.floor(y));
+            }
+        } else {
+            addToOutput(`|dx| < |dy|, рисуем, просматривая y от ${y0} до ${y1}`);
+            let step = dx / dy;
+
+            for (let y = y0; y <= y1; y++) {
+                let x = x0 + step * (y - y0);
+                addToOutput(`Для y = ${y} найдена точка x = ${x} -> рисуем (${Math.floor(x)}, ${y})`);
+                fillSquare(Math.floor(x), y);
+            }
+        }
+
+        const end = performance.now();
+        const total = (end - start).toFixed(3);
+        addToOutput(`Время исполнения: ${total} мс`);
+    }
+
+    function drawDDA() {
+        addToOutput("Алгоритм ЦДА:");
+
+        let x0 = startPoint.x;
+        let y0 = startPoint.y;
+        let x1 = endPoint.x;
+        let y1 = endPoint.y;
+
+        addToOutput(`Стартовая точка: (${x0}, ${y0})`);
+        addToOutput(`Конечная точка: (${x1}, ${y1})`);
+
+        const start = performance.now();
+
+        let dx = x1 - x0;
+        let dy = y1 - y0;
+        let steps = Math.max(Math.abs(dx), Math.abs(dy));
+        addToOutput(`Число шагов: ${steps}`);
+
+        let addX = dx / steps;
+        let addY = dy / steps;
+        if (steps == 0) {
+            addX = 0;
+            addY = 0;
+        }
+        addToOutput(`dx = ${addX}`);
+        addToOutput(`dy = ${addY}`);
+
+        for (let i = 0; i <= steps; i++) {
+            let x = x0 + addX * i;
+            let y = y0 + addY * i;
+            addToOutput(`Точка (${x}, ${y}), рисуем (${Math.floor(x)}, ${Math.floor(y)})`);
+            fillSquare(Math.floor(x), Math.floor(y));
+        }
+
+        const end = performance.now();
+        const total = (end - start).toFixed(3);
+        addToOutput(`Время исполнения: ${total} мс`);
+    }
+
+    function drawBresenhamLine() {
+        addToOutput("Алгоритм Брезенхема:");
+
+        let x0 = startPoint.x;
+        let y0 = startPoint.y;
+        let x1 = endPoint.x;
+        let y1 = endPoint.y;
+
+        addToOutput(`Стартовая точка: (${x0}, ${y0})`);
+        addToOutput(`Конечная точка: (${x1}, ${y1})`);
+
+        const start = performance.now();
+
+        const dx = Math.abs(x1 - x0);
+        const dy = Math.abs(y1 - y0);
+        const sx = x0 < x1 ? 1 : -1;
+        const sy = y0 < y1 ? 1 : -1;
+        let err = dx - dy;
+
+        addToOutput(`Сдвиг по X: ${sx}`);
+        addToOutput(`Сдвиг по Y: ${sy}`);
+
+        while (true) {
+            addToOutput(`Рисуем точку (${x0}, ${y0})`);
+            fillSquare(x0, y0);
+            if (x0 === x1 && y0 === y1) {
+                addToOutput(`Алгоритм достиг конечной точки и завершает работу`);
+                break;
+            }
+            const e2 = err * 2;
+            if (e2 > -dy) { err -= dy; x0 += sx; }
+            if (e2 < dx) { err += dx; y0 += sy; }
+            addToOutput(`Новая ошибка err = ${err}`);
+        }
+
+        const end = performance.now();
+        const total = (end - start).toFixed(3);
+        addToOutput(`Время исполнения: ${total} мс`);
+    }
+
+    function drawBresenhamCircle() {
+        addToOutput("Алгоритм Брезенхема для окружности:");
+
+        const start = performance.now();
+
+        let x0 = centerPoint.x;
+        let y0 = centerPoint.y;
+        addToOutput(`Центр в точке (${x0}, ${y0}), радиус равен ${radiusLen}`);
+        if (radiusLen < 1) {
+            addToOutput(`Радиус должен быть положительным!`);
+            return;
+        }
+        fillSquare(x0, y0, 'black');
+
+        let x = 0;
+        let y = radiusLen;
+        let d = 3 - 2 * radiusLen;
+
+        while (y >= x) {
+            addToOutput(`Рисуем точку (${x0 + x}, ${y0 + y}) и все симметричные`);
+            fillSquare(x0 + x, y0 + y);
+            fillSquare(x0 - x, y0 + y);
+            fillSquare(x0 + x, y0 - y);
+            fillSquare(x0 - x, y0 - y);
+            fillSquare(x0 + y, y0 + x);
+            fillSquare(x0 - y, y0 + x);
+            fillSquare(x0 + y, y0 - x);
+            fillSquare(x0 - y, y0 - x);
+            if (d < 0) {
+                d = d + 4 * x + 6;
+            } else {
+                d = d + 4 * (x - y) + 10;
+                y--;
+            }
+            x++;
+            addToOutput(`Ошибка err = ${d}`);
+        }
+
+        const end = performance.now();
+        const total = (end - start).toFixed(3);
+        addToOutput(`Время исполнения: ${total} мс`);
+    }
+
+    function draw() {
+        output.innerHTML = '';
+        drawGrid();
+        const algorithm = document.getElementById('algorithm').value;
+
+        if (algorithm === 'bresenhamCircle') {
+            const centerX = parseInt(document.getElementById('centerX').value);
+            const centerY = parseInt(document.getElementById('centerY').value);
+            radiusLen = parseInt(document.getElementById('radius').value);
+            centerPoint = {x: centerX, y: centerY};
+            drawBresenhamCircle();
+        } else {
+            const startX = parseInt(document.getElementById('startX').value);
+            const startY = parseInt(document.getElementById('startY').value);
+            const endX = parseInt(document.getElementById('endX').value);
+            const endY = parseInt(document.getElementById('endY').value);
+
+            startPoint = { x: startX, y: startY};
+            endPoint = { x: endX, y: endY};
+
+            if (algorithm === 'step') {
+                drawStepAlgorithm();
+            } else if (algorithm === 'dda') {
+                drawDDA();
+            } else if (algorithm === 'bresenham') {
+                drawBresenhamLine();
+            }
+        }
+    }
+
+    function updateScale() {
+        gridSize = parseInt(scaleInput.value, 10);
+        scaleValueDisplay.textContent = gridSize;
+        if (numberOfClicks == 0) drawGrid();
+        else draw();
+    }
+
+    canvas.addEventListener('mousemove', (event) => {
+        const rect = canvas.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+
+        let dx = (x - width / 2) / gridSize;
+        if (dx > 0) dx = Math.ceil(dx);
+        else dx = Math.floor(dx);
+
+        let dy = (height / 2 - y) / gridSize;
+        if (dy > 0) dy = Math.ceil(dy);
+        else dy = Math.floor(dy);
+
+        const gridX = dx;
+        const gridY = dy;
+
+        info.textContent = `Координаты: (x: ${gridX}, y: ${gridY})`;
+    });
+
+    function addToOutput(text) {
+        const p = document.createElement('p');
+        p.textContent = text;
+        output.appendChild(p);
+    }
+
+    drawGrid();
+    updateInputFields();
+</script>
+
+</body>
+</html>
