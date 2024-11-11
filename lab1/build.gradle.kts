@@ -4,6 +4,7 @@ plugins {
     kotlin("jvm")
     id("org.jetbrains.compose")
     id("org.jetbrains.kotlin.plugin.compose")
+    id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
 group = "org.example"
@@ -29,4 +30,15 @@ compose.desktop {
             packageVersion = "1.0.0"
         }
     }
+}
+
+tasks.shadowJar {
+    manifest {
+        attributes["Main-Class"] = "MainKt"
+    }
+    archiveClassifier.set("")
+}
+
+tasks.build {
+    dependsOn(tasks.shadowJar)
 }
